@@ -15,7 +15,7 @@ struct TextInputView: View {
     var style: InputViewStyle
 
     var body: some View {
-        TextField("", text: $text, axis: .vertical)
+        TextField.multiline(text: $text)
             .customFocus($globalFocusState.focus, equals: .uuid(inputFieldId))
             .placeholder(when: text.isEmpty) {
                 Text(style.placeholder)
@@ -26,5 +26,15 @@ struct TextInputView: View {
             .onTapGesture {
                 globalFocusState.focus = .uuid(inputFieldId)
             }
+    }
+}
+
+extension TextField where Label == Text {
+    static func multiline(text: Binding<String>) -> TextField<Text> {
+        if #available(iOS 16.0, *) {
+            return TextField("", text: text, axis: .vertical)
+        } else {
+            return TextField("", text: text, prompt: nil)
+        }
     }
 }

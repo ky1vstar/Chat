@@ -205,7 +205,7 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
             tableViewCell.selectionStyle = .none
 
             let row = sections[indexPath.section].rows[indexPath.row]
-            tableViewCell.contentConfiguration = UIHostingConfiguration {
+            let content = { [self] in
                 ChatMessageView(viewModel: viewModel, messageBuilder: messageBuilder, row: row, avatarSize: avatarSize, messageUseMarkdown: messageUseMarkdown, isDisplayingMessageMenu: false)
                     .background(MessageMenuPreferenceViewSetter(id: row.id))
                     .rotationEffect(Angle(degrees: 180))
@@ -214,8 +214,15 @@ struct UIList<MessageContent: View>: UIViewRepresentable {
                         self.viewModel.messageMenuRow = row
                     }
             }
-            .minSize(width: 0, height: 0)
-            .margins(.all, 0)
+            if #available(iOS 16.0, *) {
+                tableViewCell.contentConfiguration = UIHostingConfiguration(content: content)
+                    .minSize(width: 0, height: 0)
+                    .margins(.all, 0)
+            } else {
+                tableViewCell.contentConfiguration = UIHostingConfigurationBackport(content: content)
+                    .minSize(width: 0, height: 0)
+                    .margins(.all, 0)
+            }
 
             return tableViewCell
         }
